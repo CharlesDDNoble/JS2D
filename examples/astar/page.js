@@ -63,12 +63,19 @@ function cleanCoords(x,y) {
     return new Vector2D(new_x/tileSize,new_y/tileSize);
 }
 
+function createRock(x,y) {
+    return new Terrain(0,
+        new Vector2D(x,y),
+        new DisplayInfo('R',"#996633"),
+        Infinity,
+        'rock'); 
+}
+
 function on_click(ctx,event) {
     pathCounter = 0;
     exploreCounter = 0;
     var coords = cleanCoords(MOUSE_X,MOUSE_Y);
-    let rockDisInfo = new DisplayInfo('R',"#996633");
-    let rock = new Terrain(0,new Vector2D(coords.x,coords.y),rockDisInfo,Infinity,'rock');
+    let rock = createRock(coords.x,coords.y);
     let tile = map.getDataFromCoords(coords.x,coords.y);
     if (tile.objectsContained.length == 0) {
         map.addGameObject(coords.x,coords.y,rock);
@@ -107,24 +114,15 @@ function findPath(start,goal) {
 }
 
 function init(ctx) {
-    _testHeap();
-
     map = new GameMap(gridHeight/tileSize,gridWidth/tileSize,tileSize,padding/2,padding/2);
-    let rockDisInfo = new DisplayInfo('R',"#996633");
-    let rock1 = new Terrain(0,new Vector2D(0,1),rockDisInfo,Infinity,'rock');
-    let rock6 = new Terrain(1,new Vector2D(1,1),rockDisInfo,Infinity,'rock');
-    let rock2 = new Terrain(1,new Vector2D(2,1),rockDisInfo,Infinity,'rock');
-    let rock3 = new Terrain(2,new Vector2D(3,1),rockDisInfo,Infinity,'rock');
-    let rock4 = new Terrain(3,new Vector2D(4,1),rockDisInfo,Infinity,'rock');
-    let rock5 = new Terrain(4,new Vector2D(5,5),rockDisInfo,Infinity,'rock');
 
+    var allTerrain = [[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[8,1],[9,1],[10,0]];
 
-    map.addGameObject(rock1.pos.x,rock1.pos.y,rock1);
-    map.addGameObject(rock2.pos.x,rock2.pos.y,rock2);
-    map.addGameObject(rock3.pos.x,rock3.pos.y,rock3);
-    map.addGameObject(rock4.pos.x,rock4.pos.y,rock4);
-    map.addGameObject(rock5.pos.x,rock5.pos.y,rock5);
-    map.addGameObject(rock6.pos.x,rock6.pos.y,rock5);
+    for (var i = 0; i < allTerrain.length; i++) {
+        let x = allTerrain[i][0];
+        let y = allTerrain[i][1];
+        map.addGameObject(x,y,createRock(x,y));
+    }
 
     findPath(start,goal);
 }
