@@ -1,2 +1,2 @@
 # JS2D
-A small framework for making 2D Javascript games.
+A small framework for making 2D Javascript games and animations.
