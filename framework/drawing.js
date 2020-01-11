@@ -5,7 +5,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function main_loop(ctx) {
+async function mainLoop(ctx) {
     while (true) {
         update(ctx);
         draw(ctx);
@@ -26,14 +26,14 @@ function run(canvasID,width,height) {
     $(document).keydown(function(event) {onKeydown(ctx,event);});
 
     init(ctx);
-    main_loop(ctx);
+    mainLoop(ctx);
 };
 
 // =============================================================
 // DRAWING LIBRARY FUNCTIONS
 
 
-function rgba(r,g,b,a=255) {
+function rgba(r,g,b,a=1) {
     return `rgba(${r},${g},${b},${a})`;
 }
 
@@ -41,16 +41,15 @@ function font(ctx,fontName,pixSize=12) {
     ctx.font = `${pixSize}px ${fontName}`;
 }
 
-function strokeText(ctx,color,text,x,y,align='center') {
+function text(ctx,color,text,x,y,isFilled=true,align='center') {
     ctx.textAlign = align;
-    ctx.strokeStyle = color;
-    ctx.strokeText(text,x,y);
-}
-
-function fillText(ctx,color,text,x,y,align='center') {
-    ctx.textAlign = align;
-    ctx.fillStyle = color;
-    ctx.fillText(text,x,y);
+    if (isFilled) {
+        ctx.fillStyle = color;
+        ctx.fillText(text,x,y);
+    } else {
+        ctx.strokeStyle = color;
+        ctx.strokeText(text,x,y);
+    }
 }
 
 function rect(ctx,color,x,y,width,height,isFilled=true,lineWeight=10) {

@@ -32,7 +32,7 @@ function onMousemove(ctx,event) {
 }
 
 function onKeydown(ctx,event) {
-    console.log('press');
+
 }
 
 
