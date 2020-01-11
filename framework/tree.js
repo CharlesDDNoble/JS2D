@@ -1,4 +1,3 @@
-
 class Tree {
     constructor(data,parent=null) {
         this.data = data;
@@ -27,20 +26,10 @@ class Tree {
         return this.children.length;
     }
 
-    addChild(data,isTree=false) {
-        var child = null; 
-        if (isTree) {
-            child = data;
-        } else {
-            child = new Tree(data,parent);
-        }
-        this.children.push(child);
-        this.size += child.size;
-    }
-
     updateSize() {
         this.size = 1;
         for (child in this.children) {
+            child.updateSize();
             this.size += child.size;
         }
     }
@@ -49,6 +38,12 @@ class Tree {
         var data = this.data;
         this.setData(tree.getData());
         tree.setData(data);
+    }
+
+    addChild(data) {
+        var child = new Tree(data,parent);
+        this.children.push(child);
+        this.size += 1;
     }
 
     removeChild(index) {
@@ -220,11 +215,17 @@ class Heap extends Tree {
         }
     }
 
-    contains(data) {
+    /* Returns true if some node contains data equal to the target data */
+    /* O(n) operation */
+    contains(data) { 
         if (this.data === data) {
             return true;
-        } else if (this.comparator(this.data,data)) {
+        } else if (this.comparator(this.data,data)) { 
+            // minor optimization, if this is not true then no child of this node
+            // can contain the target data
             return this.getLeftChild().contains(data) || this.getRightChild().contains(data);
+        } else {
+            return false;
         }
     }
 
@@ -243,76 +244,4 @@ class Heap extends Tree {
             this.getRightChild().preorderTraverse(tabs+1);
         }
     }
-}
-
-function assert(bool,msg) {
-    if (!bool) {
-        throw new Error(msg);
-    }
-}
-
-function _testHeap() {
-    // testing min heap
-    let comp = function(x,y) {
-        if (x < y) {
-            // console.log(x+" is less than "+y);
-            return true;
-        } else {
-            // console.log(x+" is not less than "+y);
-            return false;
-        }
-    };
-    let minHeap = new Heap(100,comp);
-    assert(minHeap.data === 100,"Heap data is incorrect");
-
-    // test insert
-    minHeap.insert(500);
-    assert(minHeap.data === 100,"Heap insert is incorrect (data)");
-    assert(minHeap.getLeftChild().data === 500,"Heap insert is incorrect (child 1)");
-
-    minHeap.insert(200);
-    assert(minHeap.getRightChild().data === 200,"Heap insert is incorrect (child 2)");
-
-    minHeap.insert(10);
-    assert(minHeap.data === 10,"Insert is incorrect");
-
-    minHeap.insert(5);
-    assert(minHeap.data === 5,"Insert is incorrect");
-
-    minHeap.insert(1);
-    assert(minHeap.data === 1,"Insert is incorrect");
-    
-
-    //test extract
-    assert(minHeap.extract() == 1, "Extract is incorrect");
-
-    assert(minHeap.extract() == 5, "Extract is incorrect");
-
-    assert(minHeap.extract() == 10, "Extract is incorrect");
-
-    assert(minHeap.extract() == 100, "Extract is incorrect");
-
-    assert(minHeap.extract() == 200, "Extract is incorrect");
-
-    assert(minHeap.extract() == 500, "Extract is incorrect");
-
-    //test reuse
-
-    minHeap.insert(777);
-    assert(minHeap.data === 777,"Heap insert is incorrect (child 2)");
-
-    minHeap.insert(89);
-    assert(minHeap.data === 89,"Insert is incorrect");
-
-    minHeap.insert(44);
-    assert(minHeap.data === 44,"Insert is incorrect");
-
-    minHeap.insert(67.1);
-    assert(minHeap.data - 67.1 <= 0.001,"Insert is incorrect");
-
-    minHeap.insert(-12.1);
-    assert(minHeap.data - (-12.1) <= 0.001,"Insert is incorrect");
-
-    minHeap.insert(-1090.55959);
-    assert(minHeap.data - (-1090.55959) <= 0.001,"Insert is incorrect");
 }

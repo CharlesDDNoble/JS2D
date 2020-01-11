@@ -21,17 +21,14 @@ class DisplayInfo {
 }
 
 class GameObject {
-    constructor(id,pos,disInfo,moveCost=1) {
+    //int moveCost - extra cost of moving through a square with this object 
+    //             - 1 is base, 1.1 cost 10% more than base. Infinity for impassable.
+    constructor(id=null,pos=null,disInfo=null,moveCost=1) {
         this.id = id;
         this.pos = pos;
         this.disInfo = disInfo;
         this.moveCost = moveCost;
     }
-    //IDHolder idHolder
-    //Vector2D pos
-    //DisplayInfo disInfo
-    //int moveCost - extra cost of moving through a square with this object 
-    //             - 1 is base, 1.1 cost 10% more than base. Infinity for impassable.
 }
 
 class Terrain extends GameObject {
@@ -39,7 +36,6 @@ class Terrain extends GameObject {
         super(id,pos,disInfo,moveCost);
         this.type = type;
     }
-    //String type
 }
 
 class StatBlock {
@@ -95,12 +91,12 @@ class Build extends Action {
 }
 
 class Unit extends GameObject {
-    // Map *mapRef
+    // Map *map
     // Action currentAction
     // int team
     // StatBlock stats
-    constructor(mapRef,currentAction,team,stats) {
-        this.mapRef = mapRef;
+    constructor(map,currentAction,team,stats) {
+        this.map = map;
         this.currentAction = currentAction;
         this.team = team;
         this.stats = stats;
@@ -108,22 +104,24 @@ class Unit extends GameObject {
 }
 
 class Map2D {
-    constructor(width,height,initialValue=null) {
+    constructor(width,height,initialValue=undefined) {
         this.grid = new Array(height*width);
         this.width = width;
         this.height = height;
+        if (initialValue !== undefined) {
+            for (var i = 0; i < width*height; i++) {
+                this.grid[i] = initialValue;
+            }
+        }
     }
 
-    log() {
-        var grid = [];
-        for (var y = 0; y < this.height; y++) {
-            var row = [];
-            for (var x = 0; x < this.width; x++) {
-                row.push(this.getDataFromCoords(x,y));
-            }
-            grid.push(row);
+    toJSON() {
+        var tiles = [];
+        for (var i = 0; i < this.grid.length; i++) {
+            delete this.grid[i].map;
+            tiles.push(JSON.stringify(this.grid[i]));
         }
-        console.log(grid);
+        return tiles;
     }
 
     distance(x1,y1,x2,y2) {
