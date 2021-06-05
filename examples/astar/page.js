@@ -1,7 +1,60 @@
 // =============================================================
+// Setup
+
 $(document).ready(function() {
-    run("#canvas",canvasHeight,canvasWidth);
+    var width = $(window).width();
+    var height = $(window).height();
+    $("#canvas").prop({
+        width: width,
+        height: height
+    });
+    run("#canvas",width,height);
 });
+
+// =============================================================
+// Event Handler Functions
+
+function onMouseMove(ctx,event) {
+    var _canvas = $('#canvas')[0];
+    let canvasRect = _canvas.getClientRects()[0];
+    MOUSE_X = event.pageX-canvasRect.x-padding/2;
+    MOUSE_Y = event.pageY-canvasRect.y-padding/2;
+}
+
+function onKeyDown(ctx,event) {
+
+}
+
+function onKeyUp(ctx,event) {
+
+}
+
+function onResize(ctx,event) {
+    var width = $(window).width();
+    var height = $(window).height();
+    $("#canvas").prop({
+        width: width,
+        height: height
+    });
+}
+
+function onClick(ctx,event) {
+    pathCounter = 0;
+    exploreCounter = 0;
+    var coords = cleanCoords(MOUSE_X,MOUSE_Y);
+    let rock = createRock(coords.x,coords.y);
+    let tile = map.getDataFromCoords(coords.x,coords.y);
+    if (tile.objectsContained.length == 0) {
+        map.addGameObject(coords.x,coords.y,rock);
+    } else {
+        tile.clear();
+    }
+    findPath(start,goal);
+}
+
+// =============================================================
+// Main Drawing functions
+
 
 var map;
 
@@ -24,18 +77,6 @@ var MOUSE_Y = 0;
 
 var pathCostColors = [];
 
-function onMousemove(ctx,event) {
-    var _canvas = $('#canvas')[0];
-    let canvasRect = _canvas.getClientRects()[0];
-    MOUSE_X = event.pageX-canvasRect.x-padding/2;
-    MOUSE_Y = event.pageY-canvasRect.y-padding/2;
-}
-
-function onKeydown(ctx,event) {
-
-}
-
-
 function cleanCoords(x,y) {
     var new_x = 0;
     var new_y = 0;
@@ -55,20 +96,6 @@ function createRock(x,y) {
         new DisplayInfo('R',"#996633"),
             Infinity,
             'rock'); 
-}
-
-function onClick(ctx,event) {
-    pathCounter = 0;
-    exploreCounter = 0;
-    var coords = cleanCoords(MOUSE_X,MOUSE_Y);
-    let rock = createRock(coords.x,coords.y);
-    let tile = map.getDataFromCoords(coords.x,coords.y);
-    if (tile.objectsContained.length == 0) {
-        map.addGameObject(coords.x,coords.y,rock);
-    } else {
-        tile.clear();
-    }
-    findPath(start,goal);
 }
 
 function aStarHeur(vec1,vec2) {
@@ -98,7 +125,9 @@ function createColorArray() {
     // red to green gradient
     var gradient = [];
     for (var i = 0; i < numOfSteps; i++) {
-        var color = rgba((i*(255/numOfSteps)),255-(i*(255/numOfSteps)),0,1);
+        var r = 255-(i*(255/numOfSteps));
+        var g = (i*(255/numOfSteps));
+        var color = rgba(r,g,0,1);
         gradient.push(color);
 
     }
@@ -162,7 +191,7 @@ function init(ctx) {
 
 function update(ctx) {
     // animate path
-    if (frames%5 === 0) {
+    if (frames%3 === 0) {
         if (exploreCounter < _astarExploration.length) {
             exploreCounter++;
         } else if (pathCounter < foundPath.length) {

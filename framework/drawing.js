@@ -13,17 +13,18 @@ async function mainLoop(ctx) {
     }
 }
 
-function run(canvasID,width,height) {
+function run(canvasID) {
     // set up canvas and context for drawing
     var canvas = $(canvasID);
     var ctx = canvas[0].getContext("2d");
-    canvas.attr("width",width);
-    canvas.attr("height",height);
 
     // add event handlers
+    $(window).resize(function(event) {onResize(ctx,event);});
     canvas.click(function(event) {onClick(ctx,event);});
-    canvas.mousemove(function(event) {onMousemove(ctx,event);});
-    $(document).keydown(function(event) {onKeydown(ctx,event);});
+    canvas.mousemove(function(event) {onMouseMove(ctx,event);});
+    $(document).keydown(function(event) {onKeyDown(ctx,event);});
+    $(document).keyup(function(event) {onKeyUp(ctx,event);});
+    $(document).keypress(function(event) {onKeyPress(ctx,event);});
 
     init(ctx);
     mainLoop(ctx);
@@ -32,17 +33,47 @@ function run(canvasID,width,height) {
 // =============================================================
 // DRAWING LIBRARY FUNCTIONS
 
+window.FONT = {
+    size: 12,
+    style: 'normal',
+    family: 'normal',
+    serif: 'sans-serif'
+}
 
 function rgba(r,g,b,a=1) {
     return `rgba(${r},${g},${b},${a})`;
 }
 
-function font(ctx,fontName,pixSize=12) {
-    ctx.font = `${pixSize}px ${fontName}`;
+function font(ctx, size=null, style=null, family=null, serif=null) {
+    if (style !== null) {
+        FONT.style = style;
+    }
+    if (family !== null) {
+        FONT.family = family;
+    }
+    if (serif !== null) {
+        FONT.serif = serif;
+    }
+    if (size !== null) {
+        FONT.size = size;
+    }
+    fontString = `${FONT.style} ${FONT.size}px ${FONT.family}, ${FONT.serif}`;
+    ctx.font = fontString;
+    // console.log(fontString);
 }
 
+// default center
 function text(ctx,color,text,x,y,isFilled=true,align='center') {
+    // var aligns = ["center", "end", "left", "right", "start"];
     ctx.textAlign = align;
+    textMetric = ctx.measureText(text);
+    // translate from the center of the text box to top-left corner
+    if (align != 'center') {
+        x += textMetric.actualBoundingBoxLeft;
+        y += textMetric.actualBoundingBoxAscent;
+        // y += textMetric.actualBoundingBoxAscent 
+        //      + textMetric.actualBoundingBoxDescent;
+    }
     if (isFilled) {
         ctx.fillStyle = color;
         ctx.fillText(text,x,y);

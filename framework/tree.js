@@ -22,6 +22,14 @@ class Tree {
         return this.parent;
     }
 
+    setChildren(children) {
+        this.children = children;
+    }
+
+    getChildren() {
+        return this.children;
+    }
+
     isLeaf() {
         return this.children.length;
     }
@@ -40,9 +48,8 @@ class Tree {
         tree.setData(data);
     }
 
-    addChild(data) {
-        var child = new Tree(data,parent);
-        this.children.push(child);
+    addChild(tree) {
+        this.children.push(tree);
         this.size += 1;
     }
 
@@ -51,7 +58,7 @@ class Tree {
         this.children.splice(index,1);
 
         if (child) {
-            console.log("remove child data: "+child.data);
+            // console.log("remove child data: "+child.data);
             this.size -= child.size;
         }
 
