@@ -4,11 +4,7 @@
 $(document).ready(function() {
     var width = $(window).width();
     var height = $(window).height();
-    $("#canvas").prop({
-        width: width,
-        height: height
-    });
-    run("#canvas",width,height);
+    run("#canvas");
 });
 
 // =============================================================
@@ -17,8 +13,8 @@ $(document).ready(function() {
 function onMouseMove(ctx,event) {
     var _canvas = $('#canvas')[0];
     let canvasRect = _canvas.getClientRects()[0];
-    MOUSE_X = event.pageX-canvasRect.x-padding/2;
-    MOUSE_Y = event.pageY-canvasRect.y-padding/2;
+    MOUSE_X = event.pageX-canvasRect.x;
+    MOUSE_Y = event.pageY-canvasRect.y;
 }
 
 function onKeyDown(ctx,event) {
@@ -32,10 +28,15 @@ function onKeyUp(ctx,event) {
 function onResize(ctx,event) {
     var width = $(window).width();
     var height = $(window).height();
+    var size = findBestSize(width, height);
     $("#canvas").prop({
-        width: width,
-        height: height
+        width: size,
+        height: size
     });
+    if (map != null) {
+        map.tileSize = size/16;
+    }
+    tileSize = size/16;
 }
 
 function onClick(ctx,event) {
@@ -56,16 +57,10 @@ function onClick(ctx,event) {
 // Main Drawing functions
 
 
-var map;
+var map = null;
 
-var padding = 20;
-var canvasHeight = 512+padding;
-var canvasWidth = 512+padding;
-var gridHeight = 512;
-var gridWidth = 512;
-var tileSize = 32;
 var frames = 0;
-
+var tileSize = 16;
 var exploreCounter =  0;
 var pathCounter =  0;
 var foundPath;
@@ -77,6 +72,17 @@ var MOUSE_Y = 0;
 
 var pathCostColors = [];
 
+function findBestSize(width, height) {
+    var min = Math.min(width, height);
+    var wh = 64;
+    for (var i = 64; i <= 1024; i+=64) {
+        if (i < min) {
+            wh = i;
+        }
+    }
+    return wh;
+}
+
 function cleanCoords(x,y) {
     var new_x = 0;
     var new_y = 0;
@@ -87,7 +93,7 @@ function cleanCoords(x,y) {
     while (y > new_y+tileSize) {
         new_y += tileSize;
     }
-    return new Vector2D(new_x/tileSize,new_y/tileSize);
+    return new Vector2D(new_x / tileSize, new_y / tileSize);
 }
 
 function createRock(x,y) {
@@ -99,11 +105,11 @@ function createRock(x,y) {
 }
 
 function aStarHeur(vec1,vec2) {
-    let tile = map.getDataFromCoords(vec2.x,vec2.y);
+    let tile = map.getDataFromCoords(vec2.x, vec2.y);
     if (tile.moveCost !== Infinity) {
-        let difx = vec1.x-vec2.x;
-        let dify = vec1.y-vec2.y;
-        return Math.sqrt(difx*difx + dify*dify);
+        let difx = vec1.x - vec2.x;
+        let dify = vec1.y - vec2.y;
+        return Math.sqrt(difx * difx + dify * dify);
     } else {
         return Infinity;
     }
@@ -165,7 +171,17 @@ function findPath(start,goal) {
 
 
 function init(ctx) {
-    map = new GameMap(gridHeight/tileSize,gridWidth/tileSize,tileSize,padding/2,padding/2);
+    onResize(ctx, null);
+    var canv = $("canvas");
+    var width = canv.width();
+    var height = canv.height();
+    tileSize = canv.height()/16;
+    
+    map = new GameMap(16,
+                16,
+                height / 16,
+                0,
+                0);
 
     var allTerrain = [[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[8,1],
                       [9,1],[10,1],[11,1],[12,1],[13,2],[1,3],[2,3],[3,3],
@@ -206,27 +222,54 @@ function drawExplored(ctx) {
     for (var i = 0; i < exploreCounter; i++) {
         let pair = _astarExploration[i];
         let vec = map.getCoords(pair[0]);
-        rectCenter(ctx,pathCostColors[i],vec.x*tileSize+padding/2+tileSize/2,vec.y*tileSize+padding/2+tileSize/2,tileSize/4,tileSize/4);
+        rectCenter(ctx,
+            pathCostColors[i],
+            vec.x*tileSize+tileSize/2,
+            vec.y*tileSize+tileSize/2,
+            tileSize/4,
+            tileSize/4);
     }
 }
 
 function drawFoundPath(ctx) {
     for (var i = 0; i < pathCounter; i++) {
         let vec = map.getCoords(foundPath[i]);
-        cicle(ctx,'#000000',vec.x*tileSize+padding/2+tileSize/2,vec.y*tileSize+padding/2+tileSize/2,tileSize/8+1);
-        cicle(ctx,'#22FF22',vec.x*tileSize+padding/2+tileSize/2,vec.y*tileSize+padding/2+tileSize/2,tileSize/8);
+        cicle(ctx,
+            '#000000',
+            vec.x*tileSize+tileSize/2,
+            vec.y*tileSize+tileSize/2,
+            tileSize/6);
+        cicle(ctx,
+            '#22FF22',
+            vec.x*tileSize+tileSize/2,
+            vec.y*tileSize+tileSize/2,
+            tileSize/7);
     }
 }
 
 function draw(ctx) {
-    background(ctx,'#e6f3ff',canvasHeight,canvasWidth);
+    var canv = $("canvas")
+    var width = canv.width();
+    var height = canv.height();
+    background(ctx,'#e6f3ff',width,height);
     map.draw(ctx);
+    tileSize = canv.width()/16;
 
     // draw start rect
-    rectCenter(ctx,'#FF2200',start.x*tileSize+padding/2+tileSize/2,start.y*tileSize+padding/2+tileSize/2,tileSize,tileSize);
+    rectCenter(ctx,
+        '#FF2200',
+        start.x*tileSize+tileSize/2,
+        start.y*tileSize+tileSize/2,
+        tileSize,
+        tileSize);
     
     // draw goal rect
-    rectCenter(ctx,'#44DD22',goal.x*tileSize+padding/2+tileSize/2,goal.y*tileSize+padding/2+tileSize/2,tileSize,tileSize);
+    rectCenter(ctx,
+        '#44DD22',
+        goal.x*tileSize+tileSize/2,
+        goal.y*tileSize+tileSize/2,
+        tileSize,
+        tileSize);
 
     if (foundPath) {
         drawExplored(ctx);

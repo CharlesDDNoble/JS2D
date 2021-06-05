@@ -3,7 +3,7 @@
 $(document).ready(function() {
     var width = $(window).width();
     var height = $(window).height();
-    run("#canvas",width,height);
+    run("#canvas", width, height);
 });
 
 // =============================================================
@@ -33,10 +33,6 @@ function onResize(ctx,event) {
         width: size,
         height: size
     });
-    $("#canvas").prop({
-        width: size,
-        height: size
-    });
 }
 
 // =============================================================
@@ -57,8 +53,6 @@ function findBestSize(width, height) {
 }
 
 function init(ctx) {
-    var width = $(window).width();
-    var height = $(window).height();
     onResize(ctx, null);
 }
 

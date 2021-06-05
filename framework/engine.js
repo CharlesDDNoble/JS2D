@@ -228,7 +228,12 @@ class Tile {
         let x1 = this.pos.x*this.map.tileSize+this.map.leftPadding;
         let y1 = this.pos.y*this.map.tileSize+this.map.upperPadding;
         // draw tile
-        rect(ctx,'#ffccb3',x1,y1,this.map.tileSize,this.map.tileSize);
+        rect(ctx,
+            '#ffccb3',
+            x1,
+            y1,
+            this.map.tileSize,
+            this.map.tileSize);
 
         // draw an object on the tile
         let count = this.objectsContained.length;
@@ -240,7 +245,14 @@ class Tile {
         }
 
         // draw outline
-        rect(ctx,'#ffaa80',x1,y1,this.map.tileSize,this.map.tileSize,false,4);
+        rect(ctx,
+            '#ffaa80',
+            x1,
+            y1,
+            this.map.tileSize,
+            this.map.tileSize,
+            false,
+            4);
     }
 }
 
@@ -267,6 +279,14 @@ class GameMap extends Map2D {
     removeGameObject(x,y,gameObj) {
         let index = this.getIndex(x,y); 
         this.grid[index].removeGameObject(gameObj);
+    }
+
+    update() {
+        // for (var y = 0; y < height; y++) {
+        //     for (var x = 0; x < width; x++) {
+        //         this.setDataFromCoords(x,y,tile);
+        //     }
+        // }
     }
 
     draw(ctx) {
